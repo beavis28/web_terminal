@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Terminal</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #222;
+      color: #00ff00;
+      margin: 0;
+      padding: 20px;
+    }
+    #output {
+      white-space: pre-wrap;
+    }
+    #input {
+      width: 100%;
+      height: 50px; /* Set the height of the input element */
+      font-size: 20px; /* Set the font size of the input element */
+      background-color: #222;
+      color: #00ff00;
+      border: none;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="output"></div>
+  <input id="input" type="text" placeholder="Enter command and press Enter">
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const command = input.value.trim();
+        if (command) {
+          socket.emit('command', command);
+        }
+        input.value = '';
+      }
+    });
+
+    socket.on('output', (data) => {
+      output.textContent += '> ' + data + '\n';
+      output.scrollTop = output.scrollHeight;
+    });
+  </script>
+</body>
+</html>
