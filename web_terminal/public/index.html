@@ -17,18 +17,22 @@
     }
     #input {
       width: 100%;
-      height: 50px; /* Set the height of the input element */
-      font-size: 20px; /* Set the font size of the input element */
+      height: 50px;
+      font-size: 20px;
       background-color: #222;
       color: #00ff00;
       border: none;
       outline: none;
+      resize: none;
+    }
+    .command {
+      color: #ff9900;
     }
   </style>
 </head>
 <body>
   <div id="output"></div>
-  <input id="input" type="text" placeholder="Enter command and press Enter">
+  <textarea id="input" placeholder="Enter command and press Enter"></textarea>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
@@ -38,16 +42,35 @@
     input.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        const command = input.value.trim();
-        if (command) {
-          socket.emit('command', command);
+        if (event.shiftKey) {
+          // Insert a backslash and a new line when Shift + Enter is pressed
+          input.value = input.value.trimEnd() + ' \\\n';
+        } else {
+          const command = input.value.trim();
+          if (command) {
+            socket.emit('command', command);
+            const commandElement = document.createElement('span');
+            commandElement.classList.add('command');
+            commandElement.textContent = '> ' + command + '\n';
+            output.appendChild(commandElement);
+          }
+          input.value = '';
         }
-        input.value = '';
       }
     });
 
+    input.addEventListener('paste', (event) => {
+      event.preventDefault();
+      const pastedText = event.clipboardData.getData('text');
+      const modifiedText = pastedText.replace(/\n/g, ' \\\n');
+      const cursorPosition = input.selectionStart;
+      input.value = input.value.slice(0, cursorPosition) + modifiedText + input.value.slice(cursorPosition);
+    });
+
     socket.on('output', (data) => {
-      output.textContent += '> ' + data + '\n';
+      const responseElement = document.createElement('span');
+      responseElement.textContent = data + '\n';
+      output.appendChild(responseElement);
       output.scrollTop = output.scrollHeight;
     });
   </script>
