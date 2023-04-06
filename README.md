@@ -1,5 +1,7 @@
 # web_terminal
 
+## Made to chat with vicuna-13b or other open source GPT model
+
 ## how to run web terminal
 run node index.js
 
