@@ -1,5 +1,4 @@
 # web_terminal
-web
 
 ## how to run web terminal
 run node index.js
